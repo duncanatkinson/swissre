@@ -1,6 +1,6 @@
 package swissre;
 
-public enum ExchangeRateFileMarker {
+public enum ExchangeRateFileToken {
 
 
     START_OF_FILE("START-OF-FILE"),
@@ -16,7 +16,7 @@ public enum ExchangeRateFileMarker {
 
     private final String stringValue;
 
-    ExchangeRateFileMarker(String stringValue) {
+    ExchangeRateFileToken(String stringValue) {
         this.stringValue = stringValue;
     }
 

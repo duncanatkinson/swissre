@@ -17,11 +17,6 @@ class StringExchangeRateFileProcessorTest {
     }
 
     @Test
-    void shouldReceiveFile() throws InvalidExchangeRateFileException {
-        stringExchangeRateFileProcessor.receiveFile(EXAMPLE_FILE);
-    }
-
-    @Test
     void shouldFailToReceiveFileWithoutStartOfFile() {
         String emptyFirstLine = "invalid value";
         InvalidExchangeRateFileException exception = callReceiveAndCaptureException(emptyFirstLine);
@@ -51,6 +46,11 @@ class StringExchangeRateFileProcessorTest {
         InvalidExchangeRateFileException exception = callReceiveAndCaptureException(fileWithInvalidDate);
         String message = exception.getMessage();
         assertEquals("DATE 'invalid' is not in the format YYYYMMDD on line 3", message);
+    }
+
+    @Test
+    void shouldReceiveFile() throws InvalidExchangeRateFileException {
+        stringExchangeRateFileProcessor.receiveFile(EXAMPLE_FILE);
     }
 
     private InvalidExchangeRateFileException callReceiveAndCaptureException(String file) {
