@@ -24,7 +24,7 @@ import static swissre.ExchangeRateFileToken.*;
 public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<String> {
 
 
-    private final ResultsCollector resultsCollector;
+    private final DataStore dataStore;
 
     private Scanner scanner;
 
@@ -32,8 +32,8 @@ public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<S
     private final DateTimeFormatter exchangeRateDateTimeFormat;
     private String currentLine = "";
 
-    public StringExchangeRateFileParser(ResultsCollector resultsCollector) {
-        this.resultsCollector = resultsCollector;
+    public StringExchangeRateFileParser(DataStore dataStore) {
+        this.dataStore = dataStore;
         exchangeRateDateTimeFormat = new DateTimeFormatterBuilder()
                 .appendValue(HOUR_OF_DAY)
                 .appendLiteral(':')
@@ -69,7 +69,8 @@ public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<S
         }
         scanNextLine();
         while (!currentLineMatches(END_OF_EXCHANGE_RATES)) {
-            resultsCollector.record(getExchangeRateChangeFromCurrentLine());
+            ExchangeRateChange exchangeRateChange = getExchangeRateChangeFromCurrentLine();
+            dataStore.record(exchangeRateChange, fileDate);
             scanNextLine();
         }
         ensureNextLineMatches(END_OF_FILE);
