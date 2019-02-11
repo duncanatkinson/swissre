@@ -1,21 +1,23 @@
 package swissre;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
+import java.time.LocalDateTime;
+import java.time.chrono.IsoChronology;
+import java.time.format.*;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
-import static swissre.ExchangeRateFileToken.START_OF_FIELD_LIST;
-import static swissre.ExchangeRateFileToken.START_OF_FILE;
+import static java.time.temporal.ChronoField.*;
+import static swissre.ExchangeRateFileToken.*;
 
 /**
  * Implementation of the {@link ExchangeRateFileProcessor} for the type {@link String}
- *
+ * <p>
  * Please note that this class is not thread safe.
- *
+ * <p>
  * As this is a string processor we can assume the entire file fits in memory.
  *
  * @author Duncan Atkinson
@@ -23,9 +25,15 @@ import static swissre.ExchangeRateFileToken.START_OF_FILE;
 public class StringExchangeRateFileProcessor implements ExchangeRateFileProcessor<String> {
 
 
+    private final ResultsCollector resultsCollector;
+
     private Scanner scanner;
 
     private AtomicInteger lineCounter;
+
+    public StringExchangeRateFileProcessor(ResultsCollector resultsCollector) {
+        this.resultsCollector = resultsCollector;
+    }
 
     private Scanner initializeNewScanner(String file) {
         scanner = new Scanner(file);
@@ -40,11 +48,57 @@ public class StringExchangeRateFileProcessor implements ExchangeRateFileProcesso
     @Override
     public void receiveFile(String file) throws InvalidExchangeRateFileException {
         initializeNewScanner(file);
-
-        nextLineMatches(START_OF_FILE);
+        ensureNextLineMatches(START_OF_FILE);
         LocalDate fileDate = getFileDate();
         System.out.println("fileDate = " + fileDate);//TODO use this
-        nextLineMatches(START_OF_FIELD_LIST);
+        ensureNextLineMatches(START_OF_FIELD_LIST);
+        while (!nextLineIs(START_OF_EXCHANGE_RATES)) {
+            //skip
+        }
+
+        resultsCollector.record(getExchangeRateChange());
+        resultsCollector.record(getExchangeRateChange());
+        resultsCollector.record(getExchangeRateChange());
+        System.out.println("scanner.next() = " + scanner.next());
+//        System.out.println("scanner.next() = " + scanner.next());
+//        System.out.println("scanner.next() = " + scanner.next());
+    }
+
+    private ExchangeRateChange getExchangeRateChange() {
+        String line = scanner.next();
+        String[] parts = line.split("\\|");
+        String currency = parts[0];
+        Double exchangeRateVsDollar =Double.parseDouble(parts[1]);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss MM/dd/YYYY");
+
+        dateTimeFormatter = new DateTimeFormatterBuilder()
+                .appendValue(HOUR_OF_DAY)
+                .appendLiteral(':')
+                .appendValue(MINUTE_OF_HOUR)
+                .appendLiteral(':')
+                .appendValue(SECOND_OF_MINUTE)
+                .appendLiteral(' ')
+                .appendValue(MONTH_OF_YEAR)
+                .appendLiteral('/')
+                .appendValue(DAY_OF_MONTH, 2)
+                .appendLiteral('/')
+                .appendValue(YEAR, 4, 10, SignStyle.EXCEEDS_PAD)
+                .toFormatter();
+
+        LocalDateTime timestamp = LocalDateTime.parse(parts[2], dateTimeFormatter);
+        lineCounter.incrementAndGet();
+        return new ExchangeRateChange(currency, timestamp, exchangeRateVsDollar);
+    }
+
+    private boolean nextLineIs(ExchangeRateFileToken token) {
+        lineCounter.incrementAndGet();
+        if (scanner.findInLine(token.asString()) != null) {
+            scanner.nextLine();
+            return true;
+        } else {
+            scanner.nextLine();
+            return false;
+        }
     }
 
     /**
@@ -76,7 +130,7 @@ public class StringExchangeRateFileProcessor implements ExchangeRateFileProcesso
         throw new InvalidExchangeRateFileException("Date expected in header but not found");
     }
 
-    private void nextLineMatches(ExchangeRateFileToken expectedToken) throws InvalidExchangeRateFileException {
+    private void ensureNextLineMatches(ExchangeRateFileToken expectedToken) throws InvalidExchangeRateFileException {
         String marker = scanner.findInLine(expectedToken.asString());
         lineCounter.incrementAndGet();
         if (marker == null) {
