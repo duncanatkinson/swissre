@@ -24,6 +24,7 @@ public interface ExchangeRateFileProcessor <T> {
 
     /**
      * @param file is a state of the art exchange rate file.
+     * @throws InvalidExchangeRateFileException
      */
     void receiveFile(T file) throws InvalidExchangeRateFileException;
 }

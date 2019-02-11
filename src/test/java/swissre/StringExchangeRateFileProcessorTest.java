@@ -86,6 +86,42 @@ class StringExchangeRateFileProcessorTest {
     }
 
     @Test
+    void shouldReceiveFileGivenBlankLinesInFile() throws InvalidExchangeRateFileException {
+        stringExchangeRateFileProcessor.receiveFile("\nSTART-OF-FILE\n\n" +
+                "DATE=20181015\n\n" +
+                "ADDITIONAL=parameter\n\n" +
+                "START-OF-FIELD-LIST\n\n" +
+                "CURRENCY\n\n" +
+                "EXCHANGE_RATE\n\n" +
+                "LAST_UPDATE\n\n" +
+                "END-OF-FIELD-LIST\n\n" +
+                "START-OF-EXCHANGE-RATES\n\n" +
+                "CHF|0.9832|17:12:59 10/14/2018|\n\n" +
+                "END-OF-EXCHANGE-RATES\n\n" +
+                "END-OF-FILE\n\n");
+
+        assertEquals(1, resultsCollectorStub.getExchangeRates().size());
+    }
+
+    @Test
+    void shouldReceiveFileGivenWindowsStyleLineEndings() throws InvalidExchangeRateFileException {
+        stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\r\n" +
+                "DATE=20181015\r\n" +
+                "ADDITIONAL=parameter\r\n" +
+                "START-OF-FIELD-LIST\r\n" +
+                "CURRENCY\r\n" +
+                "EXCHANGE_RATE\r\n" +
+                "LAST_UPDATE\r\n" +
+                "END-OF-FIELD-LIST\r\n" +
+                "START-OF-EXCHANGE-RATES\r\n" +
+                "CHF|0.9832|17:12:59 10/14/2018|\r\n" +
+                "END-OF-EXCHANGE-RATES\r\n" +
+                "END-OF-FILE\r\n");
+
+        assertEquals(1, resultsCollectorStub.getExchangeRates().size());
+    }
+
+    @Test
     void shouldReceiveFileGivenManyRateChanges() throws InvalidExchangeRateFileException {
         stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\n" +
                 "DATE=20181015\n" +
@@ -121,6 +157,30 @@ class StringExchangeRateFileProcessorTest {
         ));
         assertTrue(resultsCollectorStub.getExchangeRates().containsAll(exchangeRateChanges));
         assertEquals(4, resultsCollectorStub.getExchangeRates().size());
+    }
+
+    @Test
+    void shouldFailToReceiveGivenMissingEndOfExchangeRates() {
+        String fileWithMissingEndOfExchangeRates = "START-OF-FILE\n" +
+                "DATE=20181015\n" +
+                "START-OF-EXCHANGE-RATES\n" +
+                "CHF|0.9832|17:12:59 10/14/2018|\n" +
+                "END-OF-FILE";
+        InvalidExchangeRateFileException exception = callReceiveAndCaptureException(fileWithMissingEndOfExchangeRates);
+        String message = exception.getMessage();
+        assertEquals("Unexpected exchange rate format found unable to parse 'END-OF-FILE' on line 5", message);
+    }
+
+    @Test
+    void shouldFailToReceiveGivenMissingEndOfFile() {
+        String fileWithMissingEndOfExchangeRates = "START-OF-FILE\n" +
+                "DATE=20181015\n" +
+                "START-OF-EXCHANGE-RATES\n" +
+                "CHF|0.9832|17:12:59 10/14/2018|\n" +
+                "END-OF-EXCHANGE-RATES";
+        InvalidExchangeRateFileException exception = callReceiveAndCaptureException(fileWithMissingEndOfExchangeRates);
+        String message = exception.getMessage();
+        assertEquals("Unexpected end of file", message);
     }
 
     private InvalidExchangeRateFileException callReceiveAndCaptureException(String file) {

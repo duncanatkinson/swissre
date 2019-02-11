@@ -3,6 +3,7 @@ package swissre;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.*;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -29,7 +30,7 @@ public class StringExchangeRateFileProcessor implements ExchangeRateFileProcesso
 
     private AtomicInteger lineCounter;
     private final DateTimeFormatter exchangeRateDateTimeFormat;
-    private String currentLine;
+    private String currentLine = "";
 
     public StringExchangeRateFileProcessor(ResultsCollector resultsCollector) {
         this.resultsCollector = resultsCollector;
@@ -71,11 +72,18 @@ public class StringExchangeRateFileProcessor implements ExchangeRateFileProcesso
             resultsCollector.record(getExchangeRateChangeFromCurrentLine());
             scanNextLine();
         }
-        System.out.println("scanner.next() = " + scanner.next());
+        ensureNextLineMatches(END_OF_FILE);
     }
 
     private ExchangeRateChange getExchangeRateChangeFromCurrentLine() {
         String[] parts = currentLine.split("\\|");
+
+        if (parts.length != 3) {
+            String message = "Unexpected exchange rate format found unable to parse '" + currentLine + "' on line " + lineCounter.get();
+            throw new InvalidExchangeRateFileException(message);
+
+        }
+
         String currency = parts[0];
         Double exchangeRateVsDollar = Double.parseDouble(parts[1]);
 
@@ -89,8 +97,15 @@ public class StringExchangeRateFileProcessor implements ExchangeRateFileProcesso
     }
 
     private void scanNextLine() {
-        currentLine = scanner.next();
-        lineCounter.incrementAndGet();
+        try {
+            do {
+                currentLine = scanner.next();
+                lineCounter.incrementAndGet();
+            } while (currentLine.equals(""));
+        } catch (NoSuchElementException noSuchElementException) {
+            throw new InvalidExchangeRateFileException("Unexpected end of file");
+        }
+        currentLine = currentLine.replaceAll("\r","");
     }
 
     /**
