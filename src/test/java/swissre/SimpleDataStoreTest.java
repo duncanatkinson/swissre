@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -46,6 +47,7 @@ class SimpleDataStoreTest {
         datastore.record(new ExchangeRateChange("GBP", yesterday, 1.0));
         datastore.record(new ExchangeRateChange("GBP", today, 1.2));
         List<FlaggedChange> flaggedChanges =  datastore.getFlaggedChanges();
+
         assertEquals(1, flaggedChanges.size());
         assertEquals(20, flaggedChanges.get(0).getPercentageChange());
     }
