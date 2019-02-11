@@ -42,23 +42,31 @@ public class SimpleDataStore implements DataStore {
                 .filter(changesBefore(exchangeRateChange.getTimestamp()))
                 .max(comparingByTimestamp());
 
-        if(previousChange.isPresent()){
-            double doubleValue = getPercentageRateChange(exchangeRateChange, previousChange.get());
-            if(doubleValue >= 20){
+        Optional<ExchangeRateChange> nextChange = changesForCurrency.stream()
+                .filter(changesAfter(exchangeRateChange.getTimestamp()))
+                .min(comparingByTimestamp());
+
+        // compare with before and after just in case file loads are out of order
+        flagIfDramaticRateChange(exchangeRateChange, previousChange);
+        flagIfDramaticRateChange(exchangeRateChange, nextChange);
+        this.exchangeRateChanges.get(currency).add(exchangeRateChange);
+    }
+
+    private void flagIfDramaticRateChange(ExchangeRateChange exchangeRateChange, Optional<ExchangeRateChange> nextChange) {
+        if (nextChange.isPresent()) {
+            double percentageRateChange = getPercentageRateChange(exchangeRateChange, nextChange.get());
+            if (percentageRateChange >= 20) {
                 flaggedChanges.add(new FlaggedChange());
             }
         }
-        this.exchangeRateChanges.get(currency).add(exchangeRateChange);
     }
 
     private double getPercentageRateChange(ExchangeRateChange exchangeRateChange, ExchangeRateChange previousChange) {
         BigDecimal previousRate = BigDecimal.valueOf(previousChange.getRateAgainstUSD());
         BigDecimal newRate = BigDecimal.valueOf(exchangeRateChange.getRateAgainstUSD());
-
-        BigDecimal change = previousRate.subtract(newRate).abs();
-
-        BigDecimal percentageChange = change.divide(newRate, ROUND_HALF_UP).multiply(BigDecimal.valueOf(100.0));
-
+        BigDecimal absoluteChange = previousRate.subtract(newRate).abs();
+        BigDecimal divide = absoluteChange.divide(newRate, ROUND_HALF_UP);
+        BigDecimal percentageChange = divide.multiply(BigDecimal.valueOf(100.0));
         return percentageChange.doubleValue();
     }
 
@@ -74,6 +82,10 @@ public class SimpleDataStore implements DataStore {
 
     private Predicate<ExchangeRateChange> changesBefore(LocalDateTime time) {
         return (change) -> change.getTimestamp().isBefore(time);
+    }
+
+    private Predicate<ExchangeRateChange> changesAfter(LocalDateTime time) {
+        return (change) -> change.getTimestamp().isAfter(time);
     }
 
     @Override

@@ -51,4 +51,38 @@ class SimpleDataStoreTest {
         assertEquals(1, flaggedChanges.size());
         assertEquals(20, flaggedChanges.get(0).getPercentageChange());
     }
+
+    @Test
+    void recordShouldNotFlagDayOnDayChangesOf20PercentOrMoreForDifferentCurrencies() {
+        LocalDateTime yesterday = LocalDateTime.parse("2018-01-01T13:59:00");
+        LocalDateTime today = LocalDateTime.parse("2018-01-02T13:59:00");
+        datastore.record(new ExchangeRateChange("GBP", yesterday, 1.0));
+        datastore.record(new ExchangeRateChange("CAD", today, 1.2));
+        List<FlaggedChange> flaggedChanges =  datastore.getFlaggedChanges();
+
+        assertEquals(0, flaggedChanges.size());
+    }
+
+    @Test
+    void recordShouldNotFlagDayOnDayChangesOfLessThan20Percent() {
+        LocalDateTime yesterday = LocalDateTime.parse("2018-01-01T13:59:00");
+        LocalDateTime today = LocalDateTime.parse("2018-01-02T13:59:00");
+        datastore.record(new ExchangeRateChange("GBP", yesterday, 1.0));
+        datastore.record(new ExchangeRateChange("GBP", today, 1.1999999999));
+        List<FlaggedChange> flaggedChanges =  datastore.getFlaggedChanges();
+
+        assertEquals(0, flaggedChanges.size());
+    }
+
+    @Test
+    void recordShouldFlagDayOnDayChangesOf20PercentOrMoreRegardlessOfOrdering() {
+        LocalDateTime yesterday = LocalDateTime.parse("2018-01-01T13:59:00");
+        LocalDateTime today = LocalDateTime.parse("2018-01-02T13:59:00");
+        datastore.record(new ExchangeRateChange("GBP", today, 1.2));
+        datastore.record(new ExchangeRateChange("GBP", yesterday, 1.0));
+        List<FlaggedChange> flaggedChanges =  datastore.getFlaggedChanges();
+
+        assertEquals(1, flaggedChanges.size());
+        assertEquals(20, flaggedChanges.get(0).getPercentageChange());
+    }
 }
