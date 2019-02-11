@@ -21,7 +21,7 @@ import static swissre.ExchangeRateFileToken.*;
  *
  * @author Duncan Atkinson
  */
-public class StringExchangeRateFileProcessor implements ExchangeRateFileProcessor<String> {
+public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<String> {
 
 
     private final ResultsCollector resultsCollector;
@@ -32,7 +32,7 @@ public class StringExchangeRateFileProcessor implements ExchangeRateFileProcesso
     private final DateTimeFormatter exchangeRateDateTimeFormat;
     private String currentLine = "";
 
-    public StringExchangeRateFileProcessor(ResultsCollector resultsCollector) {
+    public StringExchangeRateFileParser(ResultsCollector resultsCollector) {
         this.resultsCollector = resultsCollector;
         exchangeRateDateTimeFormat = new DateTimeFormatterBuilder()
                 .appendValue(HOUR_OF_DAY)

@@ -10,7 +10,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StringExchangeRateFileProcessorTest {
+class StringExchangeRateFileParserTest {
 
     private ExchangeRateFileProcessor<String> stringExchangeRateFileProcessor;
 
@@ -32,7 +32,7 @@ class StringExchangeRateFileProcessorTest {
                 recordedExchangeRates.add(exchangeRateChange);
             }
         };
-        this.stringExchangeRateFileProcessor = new StringExchangeRateFileProcessor(resultsCollectorStub);
+        this.stringExchangeRateFileProcessor = new StringExchangeRateFileParser(resultsCollectorStub);
     }
 
     @Test
