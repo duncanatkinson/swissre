@@ -1,7 +1,6 @@
 package swissre;
 
 import java.time.LocalDateTime;
-import java.util.Currency;
 import java.util.Objects;
 
 public class ExchangeRateChange {
@@ -11,7 +10,7 @@ public class ExchangeRateChange {
     private final Double rateAgainstUSD;
 
     public ExchangeRateChange(String currency, LocalDateTime timestamp, Double rateAgainstUSD) {
-        this.currency = Currency.getInstance(currency);
+        this.currency = Currency.valueOf(currency);
         this.timestamp = timestamp;
         this.rateAgainstUSD = rateAgainstUSD;
     }

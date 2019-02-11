@@ -3,10 +3,10 @@ package swissre;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,13 +24,18 @@ class StringExchangeRateFileParserTest {
             Set<ExchangeRateChange> recordedExchangeRates = new HashSet<>();
 
             @Override
-            public Set<ExchangeRateChange> getExchangeRates() {
+            public Set<ExchangeRateChange> getExchangeRateChanges() {
                 return recordedExchangeRates;
             }
 
             @Override
-            public void record(ExchangeRateChange exchangeRateChange, LocalDate fileDate) {
+            public void record(ExchangeRateChange exchangeRateChange) {
                 recordedExchangeRates.add(exchangeRateChange);
+            }
+
+            @Override
+            public List<FlaggedChange> getFlaggedChanges() {
+                return null;//ignored
             }
         };
         this.stringExchangeRateFileProcessor = new StringExchangeRateFileParser(dataStoreStub);
@@ -83,7 +88,7 @@ class StringExchangeRateFileParserTest {
                 "END-OF-EXCHANGE-RATES\n" +
                 "END-OF-FILE");
 
-        assertEquals(1, dataStoreStub.getExchangeRates().size());
+        assertEquals(1, dataStoreStub.getExchangeRateChanges().size());
     }
 
     @Test
@@ -101,7 +106,7 @@ class StringExchangeRateFileParserTest {
                 "END-OF-EXCHANGE-RATES\n\n" +
                 "END-OF-FILE\n\n");
 
-        assertEquals(1, dataStoreStub.getExchangeRates().size());
+        assertEquals(1, dataStoreStub.getExchangeRateChanges().size());
     }
 
     @Test
@@ -119,7 +124,7 @@ class StringExchangeRateFileParserTest {
                 "END-OF-EXCHANGE-RATES\r\n" +
                 "END-OF-FILE\r\n");
 
-        assertEquals(1, dataStoreStub.getExchangeRates().size());
+        assertEquals(1, dataStoreStub.getExchangeRateChanges().size());
     }
 
     @Test
@@ -156,8 +161,8 @@ class StringExchangeRateFileParserTest {
                         LocalDateTime.parse("2019-02-11T13:13:00"),
                         0.9999)
         ));
-        assertTrue(dataStoreStub.getExchangeRates().containsAll(exchangeRateChanges));
-        assertEquals(4, dataStoreStub.getExchangeRates().size());
+        assertTrue(dataStoreStub.getExchangeRateChanges().containsAll(exchangeRateChanges));
+        assertEquals(4, dataStoreStub.getExchangeRateChanges().size());
     }
 
     @Test

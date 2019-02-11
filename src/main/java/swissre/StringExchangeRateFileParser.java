@@ -57,6 +57,7 @@ public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<S
 
     /**
      * @param file is a state of the art exchange rate file.
+     * @throws InvalidExchangeRateFileException if there was an error detected during parsing for example non well formed.
      */
     @Override
     public void receiveFile(String file) throws InvalidExchangeRateFileException {
@@ -70,7 +71,7 @@ public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<S
         scanNextLine();
         while (!currentLineMatches(END_OF_EXCHANGE_RATES)) {
             ExchangeRateChange exchangeRateChange = getExchangeRateChangeFromCurrentLine();
-            dataStore.record(exchangeRateChange, fileDate);
+            dataStore.record(exchangeRateChange);
             scanNextLine();
         }
         ensureNextLineMatches(END_OF_FILE);

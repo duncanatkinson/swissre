@@ -1,19 +1,25 @@
 package swissre;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 /**
  * Data store for the purposes of this test.
+ *
  */
 public interface DataStore {
 
-    Set<ExchangeRateChange> getExchangeRates();
+    /**
+     * @return all exchange rates
+     */
+    Set<ExchangeRateChange> getExchangeRateChanges();
 
     /**
      * Record an exchange rate change along with the file date.
-     * @param exchangeRateChange
-     * @param fileDate
+     *
+     * @param exchangeRateChange to record
      */
-    void record(ExchangeRateChange exchangeRateChange, LocalDate fileDate);
+    void record(ExchangeRateChange exchangeRateChange);
+
+    List<FlaggedChange> getFlaggedChanges();
 }
