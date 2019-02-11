@@ -3,18 +3,18 @@ package swissre;
 import java.util.Objects;
 
 /**
- * Represents a currency.
+ * Represents an ISO 4217 currency code.
  */
-public class Currency {
+public class CurrencyCode {
 
     private final String val;
 
-    private Currency(String val) {
+    private CurrencyCode(String val) {
         this.val = val;
     }
 
-    public static Currency valueOf(String currency) {
-        return new Currency(currency);
+    public static CurrencyCode valueOf(String currency) {
+        return new CurrencyCode(currency);
     }
 
     public String getVal() {
@@ -30,8 +30,8 @@ public class Currency {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Currency currency = (Currency) o;
-        return Objects.equals(val, currency.val);
+        CurrencyCode currencyCode = (CurrencyCode) o;
+        return Objects.equals(val, currencyCode.val);
     }
 
     @Override

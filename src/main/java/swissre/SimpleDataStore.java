@@ -16,7 +16,7 @@ import static java.math.BigDecimal.ROUND_HALF_UP;
  */
 public class SimpleDataStore implements DataStore {
 
-    private final Map<Currency, List<ExchangeRateChange>> exchangeRateChanges;
+    private final Map<CurrencyCode, List<ExchangeRateChange>> exchangeRateChanges;
 
     private final List<FlaggedChange> flaggedChanges;
 
@@ -34,11 +34,11 @@ public class SimpleDataStore implements DataStore {
 
     @Override
     public void record(ExchangeRateChange exchangeRateChange) {
-        Currency currency = exchangeRateChange.getCurrency();
-        if (!this.exchangeRateChanges.containsKey(currency)) {
-            this.exchangeRateChanges.put(currency, new LinkedList<>());
+        CurrencyCode currencyCode = exchangeRateChange.getCurrencyCode();
+        if (!this.exchangeRateChanges.containsKey(currencyCode)) {
+            this.exchangeRateChanges.put(currencyCode, new LinkedList<>());
         }
-        List<ExchangeRateChange> changesForCurrency = this.exchangeRateChanges.get(currency);
+        List<ExchangeRateChange> changesForCurrency = this.exchangeRateChanges.get(currencyCode);
         Optional<ExchangeRateChange> previousChange = changesForCurrency.stream()
                 .filter(changesBefore(exchangeRateChange.getTimestamp()))
                 .max(comparingByTimestamp());
@@ -50,7 +50,7 @@ public class SimpleDataStore implements DataStore {
         // compare with before and after just in case file loads are out of order
         previousChange.ifPresent((prev) -> flagIfDramaticRateChange(exchangeRateChange, prev));
         nextChange.ifPresent((next) -> flagIfDramaticRateChange(exchangeRateChange, next));
-        this.exchangeRateChanges.get(currency).add(exchangeRateChange);
+        this.exchangeRateChanges.get(currencyCode).add(exchangeRateChange);
     }
 
     private void flagIfDramaticRateChange(ExchangeRateChange exchangeRateChange, ExchangeRateChange nextChange) {

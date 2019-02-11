@@ -50,30 +50,6 @@ class StringParserTest {
     }
 
     @Test
-    void shouldFailToReceiveFileWithMissingDate() {
-        String fileWithInvalidDate = "START-OF-FILE\nSTART-OF-FIELD-LIST";
-        InvalidExchangeRateFileException exception = callReceiveAndCaptureException(fileWithInvalidDate);
-        String message = exception.getMessage();
-        assertEquals("Date expected in header but not found", message);
-    }
-
-    @Test
-    void shouldFailToReceiveFileWithInvalidDate() {
-        String fileWithInvalidDate = "START-OF-FILE\nDATE=invalid value\n";
-        InvalidExchangeRateFileException exception = callReceiveAndCaptureException(fileWithInvalidDate);
-        String message = exception.getMessage();
-        assertEquals("DATE 'invalid value' is not in the format YYYYMMDD on line 2", message);
-    }
-
-    @Test
-    void shouldFailToReceiveFileWithInvalidDateGivenAdditionalHeaderParameters() {
-        String fileWithInvalidDate = "START-OF-FILE\nADDITIONAL=VALUE\nDATE=invalid value\n";
-        InvalidExchangeRateFileException exception = callReceiveAndCaptureException(fileWithInvalidDate);
-        String message = exception.getMessage();
-        assertEquals("DATE 'invalid value' is not in the format YYYYMMDD on line 3", message);
-    }
-
-    @Test
     void shouldReceiveFileGivenTrailingAdditionalParameters() throws InvalidExchangeRateFileException {
         stringParser.receiveFile("START-OF-FILE\n" +
                 "DATE=20181015\n" +

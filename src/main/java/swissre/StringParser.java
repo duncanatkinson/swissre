@@ -1,22 +1,22 @@
 package swissre;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.SignStyle;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.text.MessageFormat.format;
-import static java.time.format.DateTimeFormatter.BASIC_ISO_DATE;
 import static java.time.temporal.ChronoField.*;
 import static swissre.ExchangeRateFileToken.*;
 
 /**
  * Implementation of the {@link Parser} for the type {@link String}
- * <p>
+ *
  * Please note that this class is not thread safe.
- * <p>
+ *
  * As this is a string processor we can assume the entire file fits in memory.
  *
  * @author Duncan Atkinson
@@ -63,8 +63,7 @@ public class StringParser implements Parser<String> {
     public void receiveFile(String file) throws InvalidExchangeRateFileException {
         initializeNewScanner(file);
         ensureNextLineMatches(START_OF_FILE);
-        LocalDate fileDate = iterateOverFileHeaderAttributes();
-        System.out.println("fileDate = " + fileDate);//TODO use this
+
         while (!currentLineMatches(START_OF_EXCHANGE_RATES)) {
             scanNextLine();
         }
@@ -107,45 +106,7 @@ public class StringParser implements Parser<String> {
         } catch (NoSuchElementException noSuchElementException) {
             throw new InvalidExchangeRateFileException("Unexpected end of file");
         }
-        currentLine = currentLine.replaceAll("\r","");
-    }
-
-    /**
-     * Extracts the date from the head of the exchange rate file after {@link ExchangeRateFileToken#START_OF_FILE}
-     * Loops over all the key value pairs in the header in case extra fields are provided unexpectedly.
-     *
-     * @return the files date from the header
-     * @throws InvalidExchangeRateFileException if the date cannot be found or is invalid
-     */
-    private LocalDate iterateOverFileHeaderAttributes() throws InvalidExchangeRateFileException {
-        LocalDate timestamp = null;
-        scanNextLine();
-        while (currentLine.matches("[\\w ]+=[\\w ]*")) {
-            String[] pair = currentLine.split("=");
-            // for the time being we are only interested in the date
-            if (pair[0].equals("DATE")) {
-                timestamp = parseDateFromCurrentLine(pair);
-            } else {
-                System.err.println(format("Warning, not handling header parameter {0}", currentLine));
-            }
-            scanNextLine();
-        }
-        if (timestamp != null) {
-            return timestamp;
-        } else {
-            throw new InvalidExchangeRateFileException("Date expected in header but not found");
-        }
-    }
-
-    private LocalDate parseDateFromCurrentLine(String[] pair) throws InvalidExchangeRateFileException {
-        LocalDate timestamp;
-        try {
-            timestamp = LocalDate.parse(pair[1], BASIC_ISO_DATE);
-        } catch (DateTimeParseException e) {
-            String message = format("DATE ''{0}'' is not in the format YYYYMMDD on line {1}", pair[1], lineCounter.get());
-            throw new InvalidExchangeRateFileException(message);
-        }
-        return timestamp;
+        currentLine = currentLine.replaceAll("\r", "");
     }
 
     private void ensureNextLineMatches(ExchangeRateFileToken expectedToken) throws InvalidExchangeRateFileException {
