@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -69,7 +68,25 @@ class StringExchangeRateFileProcessorTest {
     }
 
     @Test
-    void shouldReceiveFile() throws InvalidExchangeRateFileException {
+    void shouldReceiveFileGivenTrailingAdditionalParameters() throws InvalidExchangeRateFileException {
+        stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\n" +
+                "DATE=20181015\n" +
+                "ADDITIONAL=parameter\n" +
+                "START-OF-FIELD-LIST\n" +
+                "CURRENCY\n" +
+                "EXCHANGE_RATE\n" +
+                "LAST_UPDATE\n" +
+                "END-OF-FIELD-LIST\n" +
+                "START-OF-EXCHANGE-RATES\n" +
+                "CHF|0.9832|17:12:59 10/14/2018|\n" +
+                "END-OF-EXCHANGE-RATES\n" +
+                "END-OF-FILE");
+
+        assertEquals(1, resultsCollectorStub.getExchangeRates().size());
+    }
+
+    @Test
+    void shouldReceiveFileGivenManyRateChanges() throws InvalidExchangeRateFileException {
         stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\n" +
                 "DATE=20181015\n" +
                 "START-OF-FIELD-LIST\n" +
@@ -81,6 +98,7 @@ class StringExchangeRateFileProcessorTest {
                 "CHF|0.9832|17:12:59 10/14/2018|\n" +
                 "GBP|0.7849|17:12:59 10/14/2018|\n" +
                 "EUR|0.8677|17:13:00 10/14/2018|\n" +
+                "CAD|0.9999|13:13:00 02/11/2019|\n" +
                 "END-OF-EXCHANGE-RATES\n" +
                 "END-OF-FILE");
         Set<ExchangeRateChange> exchangeRateChanges = new HashSet(Arrays.asList(
@@ -95,10 +113,14 @@ class StringExchangeRateFileProcessorTest {
                 new ExchangeRateChange(
                         "EUR",
                         LocalDateTime.parse("2018-10-14T17:13:00"),
-                        0.8677)
+                        0.8677),
+                new ExchangeRateChange(
+                        "CAD",
+                        LocalDateTime.parse("2019-02-11T13:13:00"),
+                        0.9999)
         ));
         assertTrue(resultsCollectorStub.getExchangeRates().containsAll(exchangeRateChanges));
-        assertEquals(3, resultsCollectorStub.getExchangeRates().size());
+        assertEquals(4, resultsCollectorStub.getExchangeRates().size());
     }
 
     private InvalidExchangeRateFileException callReceiveAndCaptureException(String file) {
