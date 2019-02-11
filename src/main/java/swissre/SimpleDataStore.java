@@ -10,8 +10,9 @@ import static java.math.BigDecimal.ROUND_HALF_UP;
 
 /**
  * Simple in memory implementation of the {@link DataStore}.
- * <p>
+ *
  * Any attempt to store an exchange rate change which has already been received will be ignored.
+ * @author Duncan Atkinson
  */
 public class SimpleDataStore implements DataStore {
 
@@ -47,25 +48,31 @@ public class SimpleDataStore implements DataStore {
                 .min(comparingByTimestamp());
 
         // compare with before and after just in case file loads are out of order
-        flagIfDramaticRateChange(exchangeRateChange, previousChange);
-        flagIfDramaticRateChange(exchangeRateChange, nextChange);
+        previousChange.ifPresent((prev) -> flagIfDramaticRateChange(exchangeRateChange, prev));
+        nextChange.ifPresent((next) -> flagIfDramaticRateChange(exchangeRateChange, next));
         this.exchangeRateChanges.get(currency).add(exchangeRateChange);
     }
 
-    private void flagIfDramaticRateChange(ExchangeRateChange exchangeRateChange, Optional<ExchangeRateChange> nextChange) {
-        if (nextChange.isPresent()) {
-            double percentageRateChange = getPercentageRateChange(exchangeRateChange, nextChange.get());
-            if (percentageRateChange >= 20) {
-                flaggedChanges.add(new FlaggedChange());
-            }
+    private void flagIfDramaticRateChange(ExchangeRateChange exchangeRateChange, ExchangeRateChange nextChange) {
+        double percentageRateChange = getPercentageRateChange(exchangeRateChange, nextChange);
+        if (percentageRateChange >= 20) {
+            flaggedChanges.add(new FlaggedChange(percentageRateChange, exchangeRateChange, nextChange));
         }
     }
 
     private double getPercentageRateChange(ExchangeRateChange exchangeRateChange, ExchangeRateChange previousChange) {
-        BigDecimal previousRate = BigDecimal.valueOf(previousChange.getRateAgainstUSD());
-        BigDecimal newRate = BigDecimal.valueOf(exchangeRateChange.getRateAgainstUSD());
-        BigDecimal absoluteChange = previousRate.subtract(newRate).abs();
-        BigDecimal divide = absoluteChange.divide(newRate, ROUND_HALF_UP);
+        BigDecimal smallerRate;
+        BigDecimal biggerRate;
+        if (previousChange.getRateAgainstUSD() < exchangeRateChange.getRateAgainstUSD()) {
+            smallerRate = BigDecimal.valueOf(previousChange.getRateAgainstUSD());
+            biggerRate = BigDecimal.valueOf(exchangeRateChange.getRateAgainstUSD());
+        }else{
+            biggerRate = BigDecimal.valueOf(previousChange.getRateAgainstUSD());
+            smallerRate = BigDecimal.valueOf(exchangeRateChange.getRateAgainstUSD());
+        }
+
+        BigDecimal absoluteChange = biggerRate.subtract(smallerRate).abs();
+        BigDecimal divide = absoluteChange.divide(smallerRate, ROUND_HALF_UP);
         BigDecimal percentageChange = divide.multiply(BigDecimal.valueOf(100.0));
         return percentageChange.doubleValue();
     }

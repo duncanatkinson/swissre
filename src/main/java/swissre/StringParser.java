@@ -13,7 +13,7 @@ import static java.time.temporal.ChronoField.*;
 import static swissre.ExchangeRateFileToken.*;
 
 /**
- * Implementation of the {@link ExchangeRateFileProcessor} for the type {@link String}
+ * Implementation of the {@link Parser} for the type {@link String}
  * <p>
  * Please note that this class is not thread safe.
  * <p>
@@ -21,7 +21,7 @@ import static swissre.ExchangeRateFileToken.*;
  *
  * @author Duncan Atkinson
  */
-public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<String> {
+public class StringParser implements Parser<String> {
 
 
     private final DataStore dataStore;
@@ -32,7 +32,7 @@ public class StringExchangeRateFileParser implements ExchangeRateFileProcessor<S
     private final DateTimeFormatter exchangeRateDateTimeFormat;
     private String currentLine = "";
 
-    public StringExchangeRateFileParser(DataStore dataStore) {
+    public StringParser(DataStore dataStore) {
         this.dataStore = dataStore;
         exchangeRateDateTimeFormat = new DateTimeFormatterBuilder()
                 .appendValue(HOUR_OF_DAY)

@@ -3,6 +3,7 @@ package swissre;
 /**
  * Exchange rate file processor, should process files as defined below
  *
+ * @author Duncan Atkinson
  * START-OF-FILE
  * DATE=20181015
  * START-OF-FIELD-LIST
@@ -20,7 +21,7 @@ package swissre;
  * The EXCHANGE_RATE is always against the US Dollar e.g. 1 USD = 0.7846 GBP.
  * @param <T> being the type of the file to process
  */
-public interface ExchangeRateFileProcessor <T> {
+public interface Parser<T> {
 
     /**
      * @param file is a state of the art exchange rate file.

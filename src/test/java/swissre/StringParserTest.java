@@ -11,9 +11,9 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StringExchangeRateFileParserTest {
+class StringParserTest {
 
-    private ExchangeRateFileProcessor<String> stringExchangeRateFileProcessor;
+    private Parser<String> stringParser;
 
     private DataStore dataStoreStub;
 
@@ -38,7 +38,7 @@ class StringExchangeRateFileParserTest {
                 return null;//ignored
             }
         };
-        this.stringExchangeRateFileProcessor = new StringExchangeRateFileParser(dataStoreStub);
+        this.stringParser = new StringParser(dataStoreStub);
     }
 
     @Test
@@ -75,7 +75,7 @@ class StringExchangeRateFileParserTest {
 
     @Test
     void shouldReceiveFileGivenTrailingAdditionalParameters() throws InvalidExchangeRateFileException {
-        stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\n" +
+        stringParser.receiveFile("START-OF-FILE\n" +
                 "DATE=20181015\n" +
                 "ADDITIONAL=parameter\n" +
                 "START-OF-FIELD-LIST\n" +
@@ -93,7 +93,7 @@ class StringExchangeRateFileParserTest {
 
     @Test
     void shouldReceiveFileGivenBlankLinesInFile() throws InvalidExchangeRateFileException {
-        stringExchangeRateFileProcessor.receiveFile("\nSTART-OF-FILE\n\n" +
+        stringParser.receiveFile("\nSTART-OF-FILE\n\n" +
                 "DATE=20181015\n\n" +
                 "ADDITIONAL=parameter\n\n" +
                 "START-OF-FIELD-LIST\n\n" +
@@ -111,7 +111,7 @@ class StringExchangeRateFileParserTest {
 
     @Test
     void shouldReceiveFileGivenWindowsStyleLineEndings() throws InvalidExchangeRateFileException {
-        stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\r\n" +
+        stringParser.receiveFile("START-OF-FILE\r\n" +
                 "DATE=20181015\r\n" +
                 "ADDITIONAL=parameter\r\n" +
                 "START-OF-FIELD-LIST\r\n" +
@@ -129,7 +129,7 @@ class StringExchangeRateFileParserTest {
 
     @Test
     void shouldReceiveFileGivenManyRateChanges() throws InvalidExchangeRateFileException {
-        stringExchangeRateFileProcessor.receiveFile("START-OF-FILE\n" +
+        stringParser.receiveFile("START-OF-FILE\n" +
                 "DATE=20181015\n" +
                 "START-OF-FIELD-LIST\n" +
                 "CURRENCY\n" +
@@ -190,7 +190,7 @@ class StringExchangeRateFileParserTest {
     }
 
     private InvalidExchangeRateFileException callReceiveAndCaptureException(String file) {
-        return assertThrows(InvalidExchangeRateFileException.class, () -> stringExchangeRateFileProcessor.receiveFile(file));
+        return assertThrows(InvalidExchangeRateFileException.class, () -> stringParser.receiveFile(file));
     }
 
 }
