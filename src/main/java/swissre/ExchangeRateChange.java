@@ -10,7 +10,11 @@ public class ExchangeRateChange {
     private final Double rateAgainstUSD;
 
     public ExchangeRateChange(String currency, LocalDateTime timestamp, Double rateAgainstUSD) {
-        this.currencyCode = CurrencyCode.valueOf(currency);
+        this(CurrencyCode.valueOf(currency), timestamp, rateAgainstUSD);
+    }
+
+    public ExchangeRateChange(CurrencyCode currencyCode, LocalDateTime timestamp, Double rateAgainstUSD) {
+        this.currencyCode = currencyCode;
         this.timestamp = timestamp;
         this.rateAgainstUSD = rateAgainstUSD;
     }

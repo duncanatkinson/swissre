@@ -4,10 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,6 +16,7 @@ class StringParserTest {
 
     @BeforeEach
     void setUp() {
+        // simple stub just to record the data passed to the store, obviously would usually be mocked.
         this.dataStoreStub = new DataStore() {
 
             Set<ExchangeRateChange> recordedExchangeRates = new HashSet<>();
@@ -37,6 +35,16 @@ class StringParserTest {
             public List<FlaggedChange> getFlaggedChanges() {
                 return null;//ignored
             }
+
+            @Override
+            public Map<String, Double> getAveragesByMonth(CurrencyCode currencyCode) {
+                return null;//ignored
+            }
+
+            @Override
+            public Map<Integer, Double> getAveragesByYear(CurrencyCode currencyCode) {
+                return null;//ignored
+            }
         };
         this.stringParser = new StringParser(dataStoreStub);
     }
@@ -49,6 +57,10 @@ class StringParserTest {
         assertEquals("Expected 'START-OF-FILE' on line 1, found 'invalid value'", message);
     }
 
+    /**
+     * For the purpose of the exercise I am assuming that the field list wouldn't change order, nor would fields
+     * be added or removed.
+     */
     @Test
     void shouldReceiveFileGivenTrailingAdditionalParameters() throws InvalidExchangeRateFileException {
         stringParser.receiveFile("START-OF-FILE\n" +
@@ -103,6 +115,7 @@ class StringParserTest {
         assertEquals(1, dataStoreStub.getExchangeRateChanges().size());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void shouldReceiveFileGivenManyRateChanges() throws InvalidExchangeRateFileException {
         stringParser.receiveFile("START-OF-FILE\n" +

@@ -3,10 +3,13 @@ package swissre;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.math.BigDecimal.ROUND_HALF_UP;
+import static java.util.stream.Collectors.averagingDouble;
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * Simple in memory implementation of the {@link DataStore}.
@@ -98,5 +101,27 @@ public class SimpleDataStore implements DataStore {
     @Override
     public List<FlaggedChange> getFlaggedChanges() {
         return flaggedChanges;
+    }
+
+    @Override
+    public Map<String, Double> getAveragesByMonth(CurrencyCode currencyCode) {
+        return exchangeRateChanges.get(currencyCode).stream()
+                .collect(groupingBy(yearAndMonth(), averagingDouble(ExchangeRateChange::getRateAgainstUSD)));
+    }
+
+    @Override
+    public Map<Integer, Double> getAveragesByYear(CurrencyCode currencyCode) {
+        return exchangeRateChanges.get(currencyCode).stream()
+                .collect(groupingBy(year(), averagingDouble(ExchangeRateChange::getRateAgainstUSD)));
+    }
+
+    private Function<ExchangeRateChange, String> yearAndMonth() {
+        return exchangeRateChange -> {
+            return exchangeRateChange.getTimestamp().getYear() + "_" + exchangeRateChange.getTimestamp().getMonth();
+        };
+    }
+
+    private Function<ExchangeRateChange, Integer> year() {
+        return exchangeRateChange -> exchangeRateChange.getTimestamp().getYear();
     }
 }
