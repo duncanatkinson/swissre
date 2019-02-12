@@ -1,5 +1,10 @@
 package swissre;
 
+import java.util.Objects;
+
+/**
+ * An exchange rate change which needs to be flagged against another exchange rate change.
+ */
 public class FlaggedChange {
 
     private final ExchangeRateChange olderRateChange;
@@ -27,5 +32,29 @@ public class FlaggedChange {
 
     public ExchangeRateChange getNewerRateChange() {
         return newerRateChange;
+    }
+
+    @Override
+    public String toString() {
+        return "FlaggedChange{" +
+                "olderRateChange=" + olderRateChange +
+                ", newerRateChange=" + newerRateChange +
+                ", percentageRateChange=" + percentageRateChange +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FlaggedChange that = (FlaggedChange) o;
+        return Double.compare(that.percentageRateChange, percentageRateChange) == 0 &&
+                Objects.equals(olderRateChange, that.olderRateChange) &&
+                Objects.equals(newerRateChange, that.newerRateChange);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(olderRateChange, newerRateChange, percentageRateChange);
     }
 }

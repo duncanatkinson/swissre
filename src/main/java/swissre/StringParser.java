@@ -51,6 +51,10 @@ public class StringParser implements Parser<String> {
 
     private void initializeNewScanner(String file) {
         scanner = new Scanner(file);
+        prepareToProcessFile();
+    }
+
+    private void prepareToProcessFile() {
         scanner.useDelimiter("\\n"); // default is newlines AND whitespace
         lineCounter = new AtomicInteger(0);
     }
@@ -62,6 +66,16 @@ public class StringParser implements Parser<String> {
     @Override
     public void receiveFile(String file) throws InvalidExchangeRateFileException {
         initializeNewScanner(file);
+        processFile();
+    }
+
+    public void receive(Scanner scanner){
+        this.scanner = scanner;
+        prepareToProcessFile();
+        processFile();
+    }
+
+    private void processFile() {
         ensureNextLineMatches(START_OF_FILE);
 
         while (!currentLineMatches(START_OF_EXCHANGE_RATES)) {
