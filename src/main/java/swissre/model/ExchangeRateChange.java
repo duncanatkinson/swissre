@@ -1,4 +1,4 @@
-package swissre;
+package swissre.model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

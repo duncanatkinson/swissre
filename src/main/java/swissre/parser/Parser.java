@@ -1,4 +1,4 @@
-package swissre;
+package swissre.parser;
 
 /**
  * Exchange rate file processor, should process files as defined below

@@ -1,6 +1,9 @@
-package swissre;
+package swissre.parser;
 
-public enum ExchangeRateFileToken {
+/**
+ * An enum of all expected tokens in the Exchange Rate File
+ */
+public enum LineMarker {
 
 
     START_OF_FILE("START-OF-FILE"),
@@ -16,11 +19,15 @@ public enum ExchangeRateFileToken {
 
     private final String stringValue;
 
-    ExchangeRateFileToken(String stringValue) {
+    LineMarker(String stringValue) {
         this.stringValue = stringValue;
     }
 
     public String asString() {
         return stringValue;
     }
-}
+
+    @Override
+    public String toString() {
+        return stringValue;
+    }}

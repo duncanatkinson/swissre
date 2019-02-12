@@ -1,6 +1,9 @@
-package swissre;
+package swissre.persistence;
 
-import java.util.Calendar;
+import swissre.model.ExchangeRateChange;
+import swissre.model.CurrencyCode;
+import swissre.model.FlaggedChange;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;

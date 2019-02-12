@@ -2,6 +2,13 @@ package swissre;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import swissre.model.CurrencyCode;
+import swissre.model.ExchangeRateChange;
+import swissre.model.FlaggedChange;
+import swissre.parser.InvalidExchangeRateFileException;
+import swissre.parser.Parser;
+import swissre.parser.StringParser;
+import swissre.persistence.DataStore;
 
 import java.time.LocalDateTime;
 import java.util.*;

@@ -1,6 +1,7 @@
 package swissre;
 
 import org.junit.jupiter.api.Test;
+import swissre.model.CurrencyCode;
 
 import static org.junit.jupiter.api.Assertions.*;
 

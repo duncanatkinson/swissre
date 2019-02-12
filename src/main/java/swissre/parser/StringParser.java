@@ -1,4 +1,7 @@
-package swissre;
+package swissre.parser;
+
+import swissre.persistence.DataStore;
+import swissre.model.ExchangeRateChange;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.text.MessageFormat.format;
 import static java.time.temporal.ChronoField.*;
-import static swissre.ExchangeRateFileToken.*;
+import static swissre.parser.LineMarker.*;
 
 /**
  * Implementation of the {@link Parser} for the type {@link String}
@@ -49,14 +52,14 @@ public class StringParser implements Parser<String> {
                 .toFormatter();
     }
 
-    private void initializeNewScanner(String file) {
-        scanner = new Scanner(file);
-        prepareToProcessFile();
-    }
-
     private void prepareToProcessFile() {
         scanner.useDelimiter("\\n"); // default is newlines AND whitespace
         lineCounter = new AtomicInteger(0);
+    }
+
+    private void initializeNewScanner(String file) {
+        scanner = new Scanner(file);
+        prepareToProcessFile();
     }
 
     /**
@@ -69,12 +72,21 @@ public class StringParser implements Parser<String> {
         processFile();
     }
 
+    /**
+     * Added to this class to allow it to be used directly from the command line
+     * instead of via {@link #receiveFile(String)}
+     *
+     * @param scanner which is expected to receive an exchange rate changes file.
+     */
     public void receive(Scanner scanner){
         this.scanner = scanner;
         prepareToProcessFile();
         processFile();
     }
 
+    /**
+     * {@link #prepareToProcessFile()} should be called before this method.
+     */
     private void processFile() {
         ensureNextLineMatches(START_OF_FILE);
 
@@ -107,8 +119,8 @@ public class StringParser implements Parser<String> {
         return new ExchangeRateChange(currency, timestamp, exchangeRateVsDollar);
     }
 
-    private boolean currentLineMatches(ExchangeRateFileToken token) {
-        return token.asString().equals(currentLine);
+    private boolean currentLineMatches(LineMarker lineMarker) {
+        return lineMarker.asString().equals(currentLine);
     }
 
     private void scanNextLine() {
@@ -123,12 +135,11 @@ public class StringParser implements Parser<String> {
         currentLine = currentLine.replaceAll("\r", "");
     }
 
-    private void ensureNextLineMatches(ExchangeRateFileToken expectedToken) throws InvalidExchangeRateFileException {
-        String tokenString = expectedToken.asString();
+    private void ensureNextLineMatches(LineMarker lineMarker) throws InvalidExchangeRateFileException {
         scanNextLine();
 
-        if (!expectedToken.asString().equals(currentLine)) {
-            String message = format("Expected ''{0}'' on line {1}, found ''{2}''", tokenString, lineCounter.get(), currentLine);
+        if (!lineMarker.asString().equals(currentLine)) {
+            String message = format("Expected ''{0}'' on line {1}, found ''{2}''", lineMarker, lineCounter.get(), currentLine);
             throw new InvalidExchangeRateFileException(message);
         }
     }

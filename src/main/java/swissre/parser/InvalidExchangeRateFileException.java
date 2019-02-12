@@ -1,4 +1,4 @@
-package swissre;
+package swissre.parser;
 
 public class InvalidExchangeRateFileException extends RuntimeException {
 

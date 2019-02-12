@@ -1,5 +1,13 @@
 package swissre;
 
+import swissre.model.CurrencyCode;
+import swissre.model.ExchangeRateChange;
+import swissre.model.FlaggedChange;
+import swissre.parser.Parser;
+import swissre.parser.StringParser;
+import swissre.persistence.DataStore;
+import swissre.persistence.SimpleDataStore;
+
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;

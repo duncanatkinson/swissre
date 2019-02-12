@@ -1,4 +1,8 @@
-package swissre;
+package swissre.persistence;
+
+import swissre.model.ExchangeRateChange;
+import swissre.model.CurrencyCode;
+import swissre.model.FlaggedChange;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

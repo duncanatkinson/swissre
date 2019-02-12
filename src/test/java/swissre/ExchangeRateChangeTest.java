@@ -1,6 +1,7 @@
 package swissre;
 
 import org.junit.jupiter.api.Test;
+import swissre.model.ExchangeRateChange;
 
 import java.time.LocalDateTime;
 

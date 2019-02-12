@@ -1,4 +1,4 @@
-package swissre;
+package swissre.model;
 
 import java.util.Objects;
 
